@@ -1,0 +1,95 @@
+---
+title: Day 1 - Building the MVP
+description: My one-day journey to create a minimal viable product (MVP).
+date: '2023-09-08'
+---
+
+## Day 1, Hour 0
+
+Waking up with determination, I embarked on the thrilling challenge of building an MVP in a single day. This post recounts my journey, highlighting key tasks, technology choices, and insights gained along the way.
+
+## Task List
+
+1. **Public Homepage Feed**: Implement a feed displaying posts from all users.
+2. **Sign Up and Login Pages**: Create user authentication flows.
+3. **User Dashboard**: Develop a dashboard for users to manage their posts.
+4. **Modals for Post Management**: Design modals for creating and editing posts.
+5. **About Page**: Craft an informative about page.
+6. **Metadata Customization**: Replace default metadata with custom branding.
+
+## The CRUD
+
+While this project involved technologies like TRPC, zod, and DrizzleORM, unfamiliarity didn't slow me down. I was pleasantly surprised by how quickly I set up basic CRUD operations. Aligning types across the frontend and backend was the most challenging part, but simplicity remained a priority. For the MVP, I focused solely on creating, reading, updating, and deleting posts.
+
+## The Frontend
+
+Leveraging Shadcn's UI library for the frontend streamlined the layout creation process. Next.js 13's `layout` files simplified maintaining consistency across pages. I only needed to import the header and footer components into the `RootLayout` within `app/layout.tsx`.
+
+```tsx
+// app/layout.tsx
+export default function RootLayout({ children }: RootLayoutProps) {
+	return (
+		<html lang="en">
+			<head />
+			<ClientProviders>
+				<body
+					className={cn(
+						'antialiased bg-white text-black dark:bg-stone-900 dark:text-white',
+						fontSans.className
+					)}
+				>
+					<Analytics />
+					<ThemeProvider
+						attribute="class"
+						defaultTheme="system"
+						enableSystem
+					>
+						<Toaster />
+						<header className="grid gap-4 text-center py-2 md:py-4 border-b">
+						</header>
+						<main className="min-h-screen">{children}</main>
+						<footer className="bg-background text-white">
+							<div className="grid md:flex container md:items-center md:justify-between gap-2 md:gap-4 py-2 md:py-6 text-sm">
+								<p>
+									Built with &#128150; by{' '}
+									<a
+										href={siteConfig.links.github}
+										target="_blank"
+										rel="noreferrer"
+										className="font-semibold underline underline-offset-4"
+									>
+										@l0kt33n
+									</a>
+								</p>
+							</div>
+						</footer>
+					</ThemeProvider>
+				</body>
+			</ClientProviders>
+		</html>
+	);
+}
+```
+
+## The Homepage
+
+The homepage's design received meticulous attention. I opted for a grid-based gallery view to display user-generated content, aiming for a one-stop-shop experience. Mobile responsiveness was crucial, achieved through a single-column layout on mobile devices.
+
+## MVP Completion
+
+By 10 PM, the MVP was ready for deployment. A few mobile layout tweaks and it was production-ready. However, the empty site needed content. I added approximately 20 posts to provide an initial user experience.
+
+Deployment was a breeze on Vercel, from domain purchase to enabling Vercel Analytics. If I had chosen manual AWS hosting, the process might have taken significantly longer.
+
+I shared the link with the Armored Core community on Discord and Reddit, eagerly awaiting their feedback.
+
+<Image
+	src="/day-1-mvp/day-1-mvp.png"
+	alt="Armored Core VI customization screen"
+	width={800}
+	height={600}
+/>
+
+As I checked the website and engaged with the community on my phone before sleep, I couldn't help but feel excited about the next day's possibilities.
+
+Stay tuned for more on this exciting journey!
