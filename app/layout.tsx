@@ -4,7 +4,7 @@ import { Inter } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Analytics } from "@/components/analytics"
 import { ModeToggle } from "@/components/mode-toggle"
-import { GoogleAnalytics } from "nextjs-google-analytics";
+import Script from 'next/script'
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -18,13 +18,13 @@ interface RootLayoutProps {
 }
 
 export default function RootLayout({ children }: RootLayoutProps) {
+  const gaMeasurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
   return (
     <html lang="en">
       <body
         className={`antialiased min-h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 ${inter.className}`}
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-        <GoogleAnalytics trackPageViews />
           <div className="max-w-2xl mx-auto py-10 px-4">
             <header>
               <div className="flex items-center justify-between">
@@ -37,6 +37,19 @@ export default function RootLayout({ children }: RootLayoutProps) {
             </header>
             <main>{children}</main>
           </div>
+          {gaMeasurementId && <>
+            <Script src={`https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}`} />
+            <Script id="google-analytics">
+              {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+ 
+          gtag('config', ${gaMeasurementId});
+        `}
+            </Script>
+          </>
+          }
           <Analytics />
         </ThemeProvider>
       </body>

@@ -41,9 +41,6 @@ dependencies:
   next-themes:
     specifier: ^0.2.1
     version: 0.2.1(next@13.4.1)(react-dom@18.2.0)(react@18.2.0)
-  nextjs-google-analytics:
-    specifier: ^2.3.3
-    version: 2.3.3(next@13.4.1)(react@18.2.0)
   postcss:
     specifier: 8.4.23
     version: 8.4.23
@@ -3784,18 +3781,6 @@ packages:
     transitivePeerDependencies:
       - '@babel/core'
       - babel-plugin-macros
-    dev: false
-
-  /nextjs-google-analytics@2.3.3(next@13.4.1)(react@18.2.0):
-    resolution: {integrity: sha512-Y6sI6A7wt5dji8hYBnVkOh9LTyImSLFZXx3FpyQgVW7W4b4qEFHjH2u3fhDJsrRZeLlUGM8/RuHD/mhHc2Axfg==}
-    peerDependencies:
-      next: '>=11.0.0'
-      react: '>=17.0.0'
-    dependencies:
-      next: 13.4.1(@opentelemetry/api@1.4.1)(react-dom@18.2.0)(react@18.2.0)
-      react: 18.2.0
-    optionalDependencies:
-      fsevents: 2.3.3
     dev: false
 
   /no-case@3.0.4:
