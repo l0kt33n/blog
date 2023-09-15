@@ -1,0 +1,95 @@
+---
+title: Battling a High Usage Alert from Vercel
+description: How I tackled a high usage alert and my attempts to resolve it.
+date: '2023-09-04'
+---
+
+## Introduction
+
+After a few days of silence, I'm back with exciting updates! The site has seen numerous enhancements, including the introduction of a search and filter system, a voting mechanism, and the ability to sort posts by date or votes. With these features, the site is now fully operational and has attracted a growing community of creators and users. I was thrilled with the progress.
+
+## Waking Up to a Warning
+
+My enthusiasm took a hit when I woke up to an alarming email from Vercel. It read, "Your account has used 75% of the included usage on the free tier for Edge Middleware invocations." I had no idea my site was using Edge Middleware, but I knew it couldn't be good, especially as the site continued to gain traction. I had to address this issue, and fast.
+
+## Deciphering Edge Middleware
+
+To tackle this problem, I needed to understand what Edge Middleware was. According to the [Vercel docs](https://vercel.com/docs/functions/edge-middleware):
+
+> Edge Middleware is code that executes before a request is processed on a site. Based on the request, you can modify the response. Because it runs before the cache, using Middleware is an effective way of providing personalization to statically generated content. Depending on the incoming request, you can execute custom logic, rewrite, redirect, add headers and more, before returning a response.
+
+<Image
+	src="https://vercel.com/_next/image?url=https%3A%2F%2Fassets.vercel.com%2Fimage%2Fupload%2Fv1689795055%2Fdocs-assets%2Fstatic%2Fdocs%2Fconcepts%2Ffunctions%2Fedge-middleware-dark.png&w=1200&q=75&dpl=dpl_3xd2hL8RKyePNraYkPY5N2KjnBBg"
+	alt="Armored Core VI customization screen"
+	width={800}
+	height={600}
+/>
+
+It became evident that Clerk, the authentication solution, utilized Edge Middleware to authenticate users and manage public and private routes. What I wasn't aware of was that this middleware was invoked with every request, and it was consuming a significant portion of our usage.
+
+```ts
+import { authMiddleware } from '@clerk/nextjs';
+
+export default authMiddleware();
+
+export const config = {
+	matcher: ['/((?!.+\\.[\\w]+$|_next).*)', '/', '/(api|trpc)(.*)'],
+};
+```
+
+## The Fix Dilemma
+
+With Edge Middleware executing on every request, I faced two options:
+
+1. Remove the Edge Runtime middleware.
+2. Reduce the number of requests to the middleware.
+
+## Attempting a Solution
+
+My initial reaction was to remove the middleware, but I soon realized that it would break the site. Without it, the site couldn't differentiate between public and private routes, nor could it handle protected procedures from the tRPC API. To remove the middleware, I'd need to rewrite a substantial part of the backend code—a daunting prospect I wanted to avoid.
+
+### App Router and TRPC
+
+Next.js 13 had introduced App Router as the production-ready default router, and it was a significant departure from the Page Router. However, not all libraries were compatible with App Router, including tRPC. Developers around the world were grappling with this challenge, often resorting to using both the App Router and the Page Router and maintaining two tRPC clients—one for the client-side and one for the server-side.
+
+[Giga Stack](https://giga-stack.vercel.app) had adopted this approach, and disentangling existing middleware from the backend code was no small task. Removing the middleware meant considering an alternative to tRPC and building the API using the App Router's [Route Handlers](https://nextjs.org/docs/app/building-your-application/routing/route-handlers). However, this would also entail handling authentication from scratch. Given my current priorities of releasing more features and growing the user base, a complete rewrite was out of the question.
+
+### Leaving It for the Future
+
+Ultimately, I decided to let future me deal with this issue. I would keep the backend as is and focus on reducing the number of middleware calls. This involved configuring routes in the middleware more efficiently and minimizing requests to the backend.
+
+## Configuring the Routes
+
+Configuring the routes proved to be less straightforward than anticipated. Despite spending an unreasonable amount of time deciphering the documentation, I couldn't determine whether the matcher object was intended to be used or ignored for routes.
+
+```ts
+// Stop Middleware running on static files and public folder
+export const config = {
+	matcher: '/((?!_next/image|_next/static|favicon.ico|site.webmanifest).*)',
+};
+```
+
+The presence of an exclamation mark (`!`) in the matcher regex added to my confusion. After extensive Google searches and documentation readings, I finally figured it out and configured the routes.
+
+Below is my final configuration. It may not be the optimal approach, but it's working for now.
+
+```ts
+import { authMiddleware } from '@clerk/nextjs';
+
+const publicPaths = ['/', '/search', '/posts(.*)', '/random'];
+const ignoredPaths = ['/about', '/tos', '/privacy', '/contact'];
+
+export default authMiddleware({
+	publicRoutes: publicPaths,
+	ignoredRoutes: ignoredPaths,
+});
+
+export const config = {
+	matcher: ['/((?!.*\\..*|_next).*)', '/', '/(api|trpc)(.*)'],
+};
+```
+
+## Is It Resolved?
+
+I can't say for certain. The usage is still increasing, albeit at a slower rate. At the very least, the site won't be taken down in the next few days. I'll keep a close watch on it and return to my primary focus: building more features.
+
